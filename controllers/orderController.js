@@ -2,6 +2,7 @@ const Order = require('../models/orderModel');
 const Product = require('../models/productModel');
 const Cart = require('../models/cartModel');
 const User = require('../models/userModel');
+const { v4: uuidv4 } = require('uuid');
 
 const createOrder = async (req, res) => {
     const user_id = req.user;
@@ -16,42 +17,37 @@ const createOrder = async (req, res) => {
         const user = await User.findById(user_id);
         const { email } = user;
 
-        const productDetails = await Promise.all(cart.products.map(async (product) => {
+        const products = cart.products.map((product) => {
+            return {
+                product_id: product.product_id,
+                quantity: product.quantity,
+            };
+        });
+
+        const subtotal = await Promise.all(products.map(async (product) => {
             const productInfo = await Product.findOne({ id: product.product_id });
             if (!productInfo) {
                 return null;
             }
-            return {
-                product_id: product.product_id,
-                quantity: product.quantity,
-                title: productInfo.title,
-                description: productInfo.description,
-                image: productInfo.image,
-                price: productInfo.price
-            };
+            return productInfo.price * product.quantity;
         }));
-        const subtotal = productDetails.reduce((acc, product) => {
-            return acc + (product.price * product.quantity);
-        }, 0);
+
+        const totalAmount = subtotal.reduce((acc, amount) => acc + amount, 0);
 
         const order = new Order({
+            id:uuidv4(),
             user_id,
             user_email: email,
             cust_Name,
             cust_Address,
             cust_PhNO: cust_PhNo,
-            products: productDetails,
-            totalAmount: subtotal,
+            products,
+            totalAmount,
             orderDate: new Date(),
-            est_DeliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // Estimated delivery date (7 days from now)
+            est_DeliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) 
         });
 
-
         await order.save();
-        for (const product of cart.products) {
-            const { productId, quantity } = product;
-            await Product.findByIdAndUpdate(productId, { $inc: { quantity: -quantity } }, { new: true });
-        }
 
         await Cart.findOneAndDelete({ user_id });
 
@@ -61,5 +57,37 @@ const createOrder = async (req, res) => {
     }
 }
 
+const getOrders = async(req, res) => {
+    const user_id = req.user;
+    try {
+        const orders = await Order.find({ user_id }, { cust_Name: 0, cust_Address: 0, cust_PhNO: 0 });
+        const ordersWithProductDetails = await Promise.all(orders.map(async (order) => {
+            const productsWithDetails = await Promise.all(order.products.map(async (product) => {
+                const productInfo = await Product.findOne({ id: product.product_id });
+                if (!productInfo) {
+                    return null;
+                }
+                return {
+                    product_id: product.product_id,
+                    quantity: product.quantity,
+                    title: productInfo.title,
+                    description: productInfo.description,
+                    image: productInfo.image,
+                    price: productInfo.price
+                };
+            }));
+            return {
+                Orderid: order.id,
+                products: productsWithDetails,
+                totalAmount: order.totalAmount,
+                orderDate: order.orderDate,
+                est_DeliveryDate: order.est_DeliveryDate
+            };
+        }));
+        res.send(ordersWithProductDetails);
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+}
 
-module.exports = { createOrder };
+module.exports = { createOrder, getOrders };

@@ -16,6 +16,7 @@ exports.deleteProduct = async (userid, productid) => {
       return { status: 200, message: "Product deleted from cart", updatedProducts };
     }
   };
+  
 
 // exports.deleteCartItem = async (userid, productid) => {
 //     try {

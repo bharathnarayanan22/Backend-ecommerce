@@ -5,6 +5,10 @@ const orderSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    id: {
+        type: String,
+        unique: true
+    },
     user_email: {
         type: String,
         required: true
@@ -23,22 +27,6 @@ const orderSchema = new mongoose.Schema({
     },
     products: [{
         product_id: {
-            type: String,
-            required: true
-        },
-        title:{
-            type: String,
-            required: true
-        },
-        price: {
-            type: Number,
-            required: true
-        },
-        image: {
-            type: String,
-            required: true
-        },
-        description: {
             type: String,
             required: true
         },
