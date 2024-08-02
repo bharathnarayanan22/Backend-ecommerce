@@ -42,8 +42,7 @@ const createOrder = async (req, res) => {
             cust_Address,
             cust_PhNO: cust_PhNo,
             products,
-            totalAmount,
-            // orderStatus: "Pending", 
+            totalAmount, 
             orderDate: new Date(),
             est_DeliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) 
         });
@@ -61,7 +60,7 @@ const createOrder = async (req, res) => {
 const getOrders = async(req, res) => {
     const user_id = req.user;
     try {
-        const orders = await Order.find({ user_id }, { cust_Name: 0, cust_Address: 0, cust_PhNO: 0 });
+        const orders = await Order.find({ user_id });
         const ordersWithProductDetails = await Promise.all(orders.map(async (order) => {
             const productsWithDetails = await Promise.all(order.products.map(async (product) => {
                 const productInfo = await Product.findOne({ id: product.product_id });
