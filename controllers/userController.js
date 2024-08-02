@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
+require('dotenv').config();
 
 const signUp = async (req, res) => {
   const { name, email, password } = req.body;
@@ -40,7 +41,7 @@ const login = async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({userId: user._id}, "secret_key", {
+    const token = jwt.sign({userId: user._id}, process.env.JWT_SECRET, {
       expiresIn: '3h'  // 3 hour expiry time
     });
     res.json({ token });

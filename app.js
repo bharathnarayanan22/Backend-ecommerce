@@ -6,10 +6,10 @@ const userRoutes = require('./routes/userRoutes');
 const CartRoutes = require('./routes/cartRoutes');
 const orderRoutes = require('./routes/orderRoute');
 const cors = require('cors');
+require('dotenv').config();
 const app = express();
 
-mongoose.connect('mongodb+srv://Bharath_Narayanan:bharath22@cluster0.16bef1g.mongodb.net/ecommerce'
-).then(()=>{
+mongoose.connect(process.env.MONGODB_URL).then(()=>{
     console.log("Connected to MongoDB");
 });
 
@@ -23,6 +23,6 @@ app.use('/users', userRoutes);
 app.use('/cart', CartRoutes);
 app.use('/order', orderRoutes);
 
-app.listen(3000, ()=>{
+app.listen(process.env.PORT, ()=>{
     console.log("Server is running on port 3000");
 });
