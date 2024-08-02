@@ -98,7 +98,4 @@ const deleteProduct = async (req, res) => {
 //  };
 
  
-
-
-
 module.exports = { addToCart, getCartItems, deleteProduct };

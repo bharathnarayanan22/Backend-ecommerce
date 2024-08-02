@@ -2,7 +2,6 @@ const Product = require("../models/productModel");
 const { v4: uuidv4 } = require('uuid');
 
 const getAllProducts = async (req, res) => {
-  console.log(req.user);
   try {
     const products = await Product.find();
     res.send(products);
