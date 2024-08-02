@@ -35,7 +35,7 @@ const createOrder = async (req, res) => {
         const totalAmount = subtotal.reduce((acc, amount) => acc + amount, 0);
 
         const order = new Order({
-            id:uuidv4(),
+            id: uuidv4(),
             user_id,
             user_email: email,
             cust_Name,
@@ -43,6 +43,7 @@ const createOrder = async (req, res) => {
             cust_PhNO: cust_PhNo,
             products,
             totalAmount,
+            // orderStatus: "Pending", 
             orderDate: new Date(),
             est_DeliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) 
         });
@@ -81,7 +82,8 @@ const getOrders = async(req, res) => {
                 products: productsWithDetails,
                 totalAmount: order.totalAmount,
                 orderDate: order.orderDate,
-                est_DeliveryDate: order.est_DeliveryDate
+                est_DeliveryDate: order.est_DeliveryDate,
+                Status: order.orderStatus 
             };
         }));
         res.send(ordersWithProductDetails);
