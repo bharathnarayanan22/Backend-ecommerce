@@ -91,4 +91,23 @@ const getOrders = async(req, res) => {
     }
 }
 
-module.exports = { createOrder, getOrders };
+const cancelOrder = async (req, res) => {
+    const user_id = req.user;
+    const { orderId } = req.body;
+    try {
+        const order = await Order.findOneAndUpdate({ user_id, id: orderId }, { orderStatus: 'Canceled' }, { new: true });
+        if (!order) {
+            return res.status(404).send({ message: 'Order not found' });
+        }
+        res.send(order);
+        const cart = await Cart.findOneAndUpdate({ user_id }, { $pull: { products: { product_id: orderId } } }, { new: true });
+        if (!cart) {
+            await Cart.create({ user_id });
+        }
+        res.send(cart);
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+}
+
+module.exports = { createOrder, getOrders, cancelOrder};
